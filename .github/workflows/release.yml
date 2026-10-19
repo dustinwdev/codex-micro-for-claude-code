@@ -1,0 +1,35 @@
+name: Release
+
+# Push a tag such as v0.8.0 to publish that version. bin/checksums.txt at the
+# tag must already list the version's programs, as scripts/build-release
+# writes it: the release is published only if this build matches.
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - run: go test ./...
+      - name: Check the version
+        run: |
+          version=${GITHUB_REF_NAME#v}
+          grep -q "const version = \"$version\"" cmd/codex-micro/main.go
+          grep -q "\"version\": \"$version\"" .claude-plugin/plugin.json
+      - name: Build
+        run: scripts/build-release "${GITHUB_REF_NAME#v}" dist
+      - name: Check the build against bin/checksums.txt
+        run: diff dist/checksums.txt bin/checksums.txt
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/* --title "$GITHUB_REF_NAME" --generate-notes

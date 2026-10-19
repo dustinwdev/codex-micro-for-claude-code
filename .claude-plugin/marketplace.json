@@ -1,0 +1,13 @@
+{
+  "name": "codex-micro",
+  "owner": {
+    "name": "dustinwdev"
+  },
+  "plugins": [
+    {
+      "name": "codex-micro",
+      "source": "./"
+    }
+  ],
+  "description": "The OpenAI Codex Micro macropad for Claude Code"
+}

@@ -1,0 +1,61 @@
+#!/bin/sh
+# Runs codex-micro for this computer. The program is downloaded from the
+# GitHub release on first use, and checked against checksums.txt beside this
+# script before it is run. A local build in build/ takes precedence.
+set -eu
+
+root=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
+if [ -x "$root/build/codex-micro" ]; then
+	exec "$root/build/codex-micro" "$@"
+fi
+
+case $(uname -s) in
+	Darwin) os=darwin cache=${XDG_CACHE_HOME:-$HOME/Library/Caches}/codex-micro ;;
+	Linux) os=linux cache=${XDG_CACHE_HOME:-$HOME/.cache}/codex-micro ;;
+	*) echo "codex-micro: $(uname -s) is not supported yet" >&2; exit 1 ;;
+esac
+case $(uname -m) in
+	x86_64 | amd64) arch=amd64 ;;
+	arm64 | aarch64) arch=arm64 ;;
+	*) echo "codex-micro: $(uname -m) is not supported yet" >&2; exit 1 ;;
+esac
+
+# A line of checksums.txt: "<sha256>  codex-micro-<version>-<os>-<arch>"
+line=$(grep " codex-micro-[0-9.]*-$os-$arch\$" "$root/bin/checksums.txt") || {
+	echo "codex-micro: no build for $os/$arch" >&2
+	exit 1
+}
+sum=${line%% *}
+name=${line##* }
+program=$cache/$name
+
+if [ ! -x "$program" ]; then
+	version=${name#codex-micro-}
+	version=${version%-"$os"-"$arch"}
+	url=https://github.com/dustinwdev/codex-micro-for-claude-code/releases/download/v$version/$name
+	mkdir -p "$cache"
+	download=$(mktemp "$cache/.download.XXXXXX")
+	trap 'rm -f "$download"' EXIT
+	if command -v curl >/dev/null; then
+		curl -fsSL --retry 2 -o "$download" "$url"
+	elif command -v wget >/dev/null; then
+		wget -q -O "$download" "$url"
+	else
+		echo "codex-micro: curl or wget is needed to download $name" >&2
+		exit 1
+	fi
+	if command -v sha256sum >/dev/null; then
+		got=$(sha256sum "$download")
+	else
+		got=$(shasum -a 256 "$download")
+	fi
+	if [ "${got%% *}" != "$sum" ]; then
+		echo "codex-micro: $name does not match its checksum; not running it" >&2
+		exit 1
+	fi
+	chmod 755 "$download"
+	mv "$download" "$program"
+	trap - EXIT
+fi
+
+exec "$program" "$@"

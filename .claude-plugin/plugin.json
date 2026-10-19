@@ -1,0 +1,21 @@
+{
+  "name": "codex-micro",
+  "version": "0.8.0",
+  "description": "Use an OpenAI Codex Micro with Claude Code: a status light and key per session, approve and deny from the pad, hold-to-dictate, and every control remappable",
+  "author": {
+    "name": "dustinwdev",
+    "url": "https://github.com/dustinwdev"
+  },
+  "homepage": "https://github.com/dustinwdev/codex-micro-for-claude-code",
+  "repository": "https://github.com/dustinwdev/codex-micro-for-claude-code",
+  "license": "MIT",
+  "keywords": [
+    "codex-micro",
+    "macropad",
+    "hardware",
+    "macos",
+    "linux",
+    "dictation"
+  ],
+  "types": "./types/index.d.ts"
+}
