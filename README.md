@@ -152,7 +152,7 @@ The program is written in Go, with no dependencies to install. Nothing is writte
 
 With Go installed, `go build -o build/codex-micro ./cmd/codex-micro` builds the program. The plugin uses a build in `build/` over the downloaded one. `go test ./...` runs the program's tests, and `claude plugin test .` the plugin's.
 
-Releases are reproducible: `scripts/build-release 0.8.0 dist` rebuilds a version's programs byte for byte, so you can check them against [`bin/checksums.txt`](bin/checksums.txt) yourself. The release workflow publishes a version only when its own build matches.
+Releases are reproducible: `scripts/build-release 0.8.1 dist` rebuilds a version's programs byte for byte, so you can check them against [`bin/checksums.txt`](bin/checksums.txt) yourself. The release workflow publishes a version only when its own build matches.
 
 ## Credits
 
